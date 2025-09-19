@@ -164,12 +164,12 @@ class LD_Mux_Streaming_Public {
 				$enabled === 'yes' 
 				&& !learndash_is_lesson_complete($current_user->ID, $lesson_id) 
 			) {
-
 				$html = '';
-				$playback_id = '';
-				
-            	if ( !empty( $mux_video_file ) ) $playback_id = $this->get_mux_playback_id($mux_video_file);
 
+				// $playback_id = '';
+            	// if ( !empty( $mux_video_file ) ) $playback_id = $this->get_mux_playback_id($mux_video_file);
+
+				$playback_id = !empty(get_post_meta( $post->ID, '_mux_video_playback_id', true )) ? get_post_meta( $post->ID, '_mux_video_playback_id', true ) : '';
 				
 				if ( !empty($playback_id) ) {
 					$html = '<iframe src="https://player.mux.com/' . esc_attr($playback_id) . '" style="width:100%; border:none; aspect-ratio:16/9;" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" allowfullscreen></iframe>';

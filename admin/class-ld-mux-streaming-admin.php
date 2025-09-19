@@ -157,37 +157,37 @@ class LD_Mux_Streaming_Admin {
                 <!-- <h2><?php //esc_html_e( 'Mux API Credentials', 'ld-mux-streaming' ); ?></h2> -->
                 <form method="post" action="options.php">
                     <?php
-                    settings_fields( 'ld_mux_options' );
-                    do_settings_sections( 'ld-mux-streaming' );
-                    submit_button( __( 'Save Credentials', 'ld-mux-streaming' ) );
+                        settings_fields( 'ld_mux_options' );
+                        do_settings_sections( 'ld-mux-streaming' );
+                        submit_button( __( 'Save Credentials', 'ld-mux-streaming' ) );
                     ?>
                 </form>
 
                 <hr>
 
-                <form id="ld-mux-upload-form" enctype="multipart/form-data" method="post">
+                <!-- <form id="ld-mux-upload-form" enctype="multipart/form-data" method="post"> -->
                     <!-- <input type="hidden" name="action" value="ld_mux_upload_video"> -->
-                    <input type="hidden" id="video_nonce_field" name="ld_mux_upload_video_nonce_field" value="<?php echo wp_create_nonce('ld_mux_upload_video_nonce'); ?>">
+                    <!-- <input type="hidden" id="video_nonce_field" name="ld_mux_upload_video_nonce_field" value="<?php //echo wp_create_nonce('ld_mux_upload_video_nonce'); ?>"> -->
 
-                    <table class="form-table">
+                    <!-- <table class="form-table">
                         <tr>
-                            <th><label for="ld_mux_video_title"><?php esc_html_e( 'Title', 'ld-mux-streaming' ); ?></label></th>
+                            <th><label for="ld_mux_video_title"><?php //esc_html_e( 'Title', 'ld-mux-streaming' ); ?></label></th>
                             <td><input id="video_title" type="text" name="ld_mux_video_title" class="regular-text"></td>
                         </tr>
                         <tr>
-                            <th><label for="ld_mux_video_desc"><?php esc_html_e( 'Description', 'ld-mux-streaming' ); ?></label></th>
+                            <th><label for="ld_mux_video_desc"><?php //esc_html_e( 'Description', 'ld-mux-streaming' ); ?></label></th>
                             <td><textarea id="video_description" name="ld_mux_video_desc" rows="4" cols="50"></textarea></td>
                         </tr>
                         <tr>
-                            <th><label for="ld_mux_video_file"><?php esc_html_e( 'Video File', 'ld-mux-streaming' ); ?></label></th>
+                            <th><label for="ld_mux_video_file"><?php //esc_html_e( 'Video File', 'ld-mux-streaming' ); ?></label></th>
                             <td><input id="video_file" type="file" name="ld_mux_video_file" accept="video/*" ></td>
                         </tr>
-                    </table>
+                    </table> -->
 
-                    <button type="submit" class="button button-primary"><?php esc_html_e( 'Upload to Mux', 'ld-mux-streaming' ); ?></button>
-                </form>
+                    <!-- <button type="submit" class="button button-primary"><?php //esc_html_e( 'Upload to Mux', 'ld-mux-streaming' ); ?></button> -->
+                <!-- </form> -->
 
-                <div id="ld-mux-upload-response"></div>
+                <!-- <div id="ld-mux-upload-response"></div> -->
 
 
             </div>
@@ -573,12 +573,13 @@ class LD_Mux_Streaming_Admin {
                 $mux_streaming_checkbox_value = '';
             }
 
-            $mux_video_title = get_post_meta( $post_id, '_mux_video_title', true );
-            $mux_video_desc = get_post_meta( $post_id, '_mux_video_desc', true );
-            $mux_video_file = get_post_meta( $post_id, '_mux_video_file', true );
+            $mux_video_title = !empty(get_post_meta( $post_id, '_mux_video_title', true )) ? get_post_meta( $post_id, '_mux_video_title', true ) : '';
+            $mux_video_desc = !empty(get_post_meta( $post_id, '_mux_video_desc', true )) ? get_post_meta( $post_id, '_mux_video_desc', true ) : '';
+            $mux_video_file = !empty(get_post_meta( $post_id, '_mux_video_file', true )) ? get_post_meta( $post_id, '_mux_video_file', true ) : '';
+            $playback_id = !empty(get_post_meta( $post_id, '_mux_video_playback_id', true )) ? get_post_meta( $post_id, '_mux_video_playback_id', true ) : '';
 
-            $playback_id = '';
-            if ( !empty( $mux_video_file ) ) $playback_id = $this->get_mux_playback_id($mux_video_file);
+            // $playback_id = '';
+            // if ( !empty( $mux_video_file ) ) $playback_id = $this->get_mux_playback_id($mux_video_file);
 
             $setting_option_fields['mux-streaming-switch'] = array(
                 'name'      => 'mux-streaming-switch',
@@ -659,25 +660,23 @@ class LD_Mux_Streaming_Admin {
             if (isset($_FILES['ld_mux_video_file']) && $_FILES['ld_mux_video_file']['error'] === UPLOAD_ERR_OK) {
                 $file = $_FILES['ld_mux_video_file'];
 
-                // $upload_overrides = array('test_form' => false); // Disable form check
-                // $movefile = wp_handle_upload($file, $upload_overrides);
+                $existingFileID = get_post_meta( $post_id, '_mux_video_file', true );
+                $response = $this->handle_custom_upload($title, $desc, $file, $existingFileID);
 
-                // if ($movefile && !isset($movefile['error'])) {
-                //     update_post_meta($post_id, '_mux_video_file', $movefile['url']);
-                // } else {
-                //     error_log('File upload error: ' . $movefile['error']);
-                // }
+                if($response && $response['id']) {
+                    update_post_meta( $post_id, '_mux_video_file', $response['id'] );
+
+                    $playback_id = $this->get_mux_playback_id($response['id']);
+                    if($playback_id) update_post_meta( $post_id, '_mux_video_playback_id', $playback_id );
+                }
+
+                wp_send_json_success([
+                    'message'   => 'Video uploaded successfully!',
+                    'resetField' => true
+                ]);
             }
 
-            $existingFileID = get_post_meta( $post_id, '_mux_video_file', true );
-            $response = $this->handle_custom_upload($title, $desc, $file, $existingFileID);
-
-            if($response && $response['id']) update_post_meta( $post_id, '_mux_video_file', $response['id'] );
-
-            // if (isset($_POST['learndash-lesson-display-content-settings']['ld_mux_video_file'])) {
-            //     $file = sanitize_textarea_field($_POST['learndash-lesson-display-content-settings']['ld_mux_video_file']);
-            //     update_post_meta( $post_id, '_mux_video_file', $fileID );
-            // }
+            else wp_send_json_success(['message'   => 'Invalid Video!', 'data' => $file]);
 		}
 	}
 }

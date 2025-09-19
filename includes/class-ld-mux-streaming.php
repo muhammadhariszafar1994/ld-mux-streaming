@@ -159,8 +159,8 @@ class LD_Mux_Streaming {
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_plugin_admin_menu', 30, 2 );
         $this->loader->add_action( 'admin_init', $plugin_admin, 'register_settings', 30, 2 );
 		
-		$this->loader->add_action( 'wp_ajax_ld_mux_upload_video', $plugin_admin, 'handle_upload', 30, 2 );
-		$this->loader->add_action( 'wp_ajax_nopriv_ld_mux_upload_video', $plugin_admin, 'handle_upload', 30, 2 );
+		// $this->loader->add_action( 'wp_ajax_ld_mux_upload_video', $plugin_admin, 'handle_upload', 30, 2 );
+		// $this->loader->add_action( 'wp_ajax_nopriv_ld_mux_upload_video', $plugin_admin, 'handle_upload', 30, 2 );
 
 		$this->loader->add_filter( 'learndash_settings_fields', $plugin_admin, 'add_custom_field', 30, 2 );
 		$this->loader->add_action( 'save_post', $plugin_admin, 'save_my_custom_meta', 30, 3 );
